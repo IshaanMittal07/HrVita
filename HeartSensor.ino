@@ -10,23 +10,22 @@ int8_t SPO2Valid;
 int8_t heartRateValid;
 
 void setup() {
-Serial.begin(115200); // Initialize Serial Monitor at 115200 baud
-Wire.begin(6, 7);
-// If sensor fails to initialize, print an error message
-while (!particleSensor.begin()) { //
-Serial.println("MAX30102 not found!");
-delay(1000); // 2 sec delay before printing the message again
-}
-// Configuration: (Led Brightness (0-255), Sample Average, LED Mode (both IR and Red),
-// Sample Rate (Hz), Pulse Width (LED pulse width), ADC Range)
-particleSensor.sensorConfiguration(60, SAMPLEAVG_16, MODE_MULTILED,
-SAMPLERATE_1600, PULSEWIDTH_411,
-ADCRANGE_16384);
+  Serial.begin(115200); // Initialize Serial Monitor at 115200 baud
+  Wire.begin(6, 7); //SDA: GPIO6, SCL: GPIO7
+  // If sensor fails to initialize, print an error message
+  while (!particleSensor.begin()) { //
+    Serial.println("MAX30102 not found!");
+    delay(1000); // 2 sec delay before printing the message again
+  }
+  // Configuration: (Led Brightness (0-255), Sample Average, LED Mode (both IR and Red),
+  // Sample Rate (Hz), Pulse Width (LED pulse width), ADC Range)
+  particleSensor.sensorConfiguration(60, SAMPLEAVG_16, MODE_MULTILED,
+                                    SAMPLERATE_1600, PULSEWIDTH_411,
+                                    ADCRANGE_16384);
 }
 // Put your main code here, to run repeatedly:
 void loop() {
-// int IRvalue = particleSensor.getIR();
-particleSensor.heartrateAndOxygenSaturation(&SPO2, &SPO2Valid,&heartRate, &heartRateValid);
-Serial.println(heartRate); // Print the IR values to Serial Monitor
+  // int IRvalue = particleSensor.getIR();
+  particleSensor.heartrateAndOxygenSaturation(&SPO2, &SPO2Valid,&heartRate, &heartRateValid);
+  Serial.println(heartRate); // Print the IR values to Serial Monitor
 }
-
