@@ -31,8 +31,8 @@ void setup() {
     delay(1000);
   }
   
-  particleSensor.sensorConfiguration(60, SAMPLEAVG_16, MODE_MULTILED,
-                                    SAMPLERATE_1600, PULSEWIDTH_411,
+  particleSensor.sensorConfiguration(60, SAMPLEAVG_8, MODE_MULTILED,
+                                    SAMPLERATE_400, PULSEWIDTH_411,
                                     ADCRANGE_16384);
   
   // Initialize array
@@ -65,11 +65,12 @@ void loop() {
         calculateVariance();
       }
     }
-    
+
+    float stDev = sqrt(hrVariance);
     // Print current values
     Serial.print(heartRate);
     Serial.print(",");
-    Serial.println(hrVariance);
+    Serial.println(stDev);
   }
 }
 
