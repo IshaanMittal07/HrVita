@@ -1,1 +1,3 @@
-# PulseAIBand
+# Hrvita
+
+HRV and Vita (Life)
