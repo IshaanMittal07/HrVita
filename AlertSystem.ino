@@ -1,6 +1,3 @@
-// Connect over phone hotspot
-// tentative; not complete
-
 #include <DFRobot_MAX30102.h>
 #include <Wire.h>
 #include <WiFi.h>
@@ -9,8 +6,8 @@
 DFRobot_MAX30102 particleSensor;
 
 // WiFi credentials - CHANGE THESE
-const char* ssid = "YOUR_WIFI_SSID";
-const char* password = "YOUR_WIFI_PASSWORD";
+const char* ssid = "0";
+const char* password = "0";
 
 WebServer server(80);
 
@@ -67,6 +64,7 @@ void setup() {
   // Setup web server endpoints
   server.on("/", handleRoot);
   server.on("/data", handleData);
+  server.enableCORS(true); // Enable CORS for local websites
   server.begin();
   Serial.println("Web server started");
   
