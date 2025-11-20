@@ -6,8 +6,8 @@
 DFRobot_MAX30102 particleSensor;
 
 // WiFi credentials - CHANGE THESE
-const char* ssid = "John";
-const char* password = "p949zvp2";
+const char* ssid = "YOUR_WIFI_SSID";
+const char* password = "YOUR_WIFI_PASSWORD";
 
 WebServer server(80);
 
@@ -82,7 +82,7 @@ void loop() {
     particleSensor.heartrateAndOxygenSaturation(&SPO2, &SPO2Valid, &heartRate, &heartRateValid);
     
     // Store ALL readings (even if not perfect) to get faster response
-    if (heartRate > 0 && heartRate < 300) {
+    if (heartRate > 0 && heartRate < 200) {
       hrReadings[readingIndex] = heartRate;
       readingIndex = (readingIndex + 1) % MAX_READINGS;
       if (readingCount < MAX_READINGS) {
@@ -100,7 +100,7 @@ void loop() {
             alertActive = true;
             Serial.println("ALERT: High variability detected!");
           }
-        } else if (hrStdDev < 15) {
+        } else if (hrStdDev < 16) {
           if (alertType != "low") {
             alertType = "low";
             alertActive = true;
@@ -121,7 +121,7 @@ void loop() {
     
     // Status indicator (0=normal, 50=low variability, 100=high variability)
     int status = 0;
-    if (hrStdDev < 15) {
+    if (hrStdDev < 16) {
       status = 50; // Low variability alert
     } else if (hrStdDev > 45) {
       status = 100; // High variability alert
@@ -187,7 +187,7 @@ void handleRoot() {
   "document.getElementById('hr').innerText=d.heartRate;"
   "document.getElementById('stddev').innerText=d.stdDev.toFixed(2);"
   "let a=document.getElementById('alert');"
-  "if(d.alertType=='high'){a.className='alert-box show high';a.innerHTML='&#9888; High Variability Alert (StdDev > 45)'}else if(d.alertType=='low'){a.className='alert-box show low';a.innerHTML='&#9888; Low Variability Alert (StdDev < 15)'}else{a.className='alert-box'}"
+  "if(d.alertType=='high'){a.className='alert-box show high';a.innerHTML='&#9888; High Variability Alert (StdDev > 45)'}else if(d.alertType=='low'){a.className='alert-box show low';a.innerHTML='&#9888; Low Variability Alert (StdDev < 16)'}else{a.className='alert-box'}"
   "let time=new Date().toLocaleTimeString();"
   "hrData.push(d.heartRate);stdDevData.push(d.stdDev);labels.push(time);"
   "if(hrData.length>maxPoints){hrData.shift();stdDevData.shift();labels.shift();}"
@@ -210,16 +210,6 @@ void handleRoot() {
   "</div>"
   "</div>"
   "<div id='alert' class='alert-box'></div>"
-  "<div class='charts'>"
-  "<div class='chart-container'>"
-  "<div class='chart-title'>Heart Rate Over Time</div>"
-  "<canvas id='hrChart'></canvas>"
-  "</div>"
-  "<div class='chart-container'>"
-  "<div class='chart-title'>Standard Deviation Over Time</div>"
-  "<canvas id='stdDevChart'></canvas>"
-  "</div>"
-  "</div>"
   "</div>"
   "</body></html>");
   
