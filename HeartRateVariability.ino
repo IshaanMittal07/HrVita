@@ -6,8 +6,8 @@
 DFRobot_MAX30102 particleSensor;
 
 // WiFi credentials - CHANGE THESE
-const char* ssid = "0";
-const char* password = "0";
+const char* ssid = "YOUR_WIFI_SSID";
+const char* password = "YOUR_WIFI_PASSWORD";
 
 WebServer server(80);
 
@@ -24,7 +24,7 @@ int readingCount = 0;
 
 float hrStdDev = 0;
 bool alertActive = false;
-String lastAlertTime = "";
+String alertType = ""; // "high", "low", or ""
 
 unsigned long lastReadTime = 0;
 
@@ -64,7 +64,6 @@ void setup() {
   // Setup web server endpoints
   server.on("/", handleRoot);
   server.on("/data", handleData);
-  server.enableCORS(true); // Enable CORS for local websites
   server.begin();
   Serial.println("Web server started");
   
@@ -94,12 +93,21 @@ void loop() {
       if (readingCount >= 5) {
         calculateStdDev();
         
-        // Check for alert condition
-        if (hrStdDev > 45 && !alertActive) {
-          alertActive = true;
-          lastAlertTime = String(millis() / 1000) + "s";
-          Serial.println("ALERT: High variability detected!");
-        } else if (hrStdDev <= 45) {
+        // Check for alert conditions
+        if (hrStdDev > 45) {
+          if (alertType != "high") {
+            alertType = "high";
+            alertActive = true;
+            Serial.println("ALERT: High variability detected!");
+          }
+        } else if (hrStdDev < 16) {
+          if (alertType != "low") {
+            alertType = "low";
+            alertActive = true;
+            Serial.println("ALERT: Low variability detected!");
+          }
+        } else {
+          alertType = "";
           alertActive = false;
         }
       }
@@ -111,14 +119,12 @@ void loop() {
     Serial.print(hrStdDev);
     Serial.print(",");
     
-    // Status indicator for demo (0=stable, 50=moderate, 100=high)
+    // Status indicator (0=normal, 50=low variability, 100=high variability)
     int status = 0;
-    if (hrStdDev < 50) {
-      status = 0; // Stable/Normal
-    } else if (hrStdDev < 80) {
-      status = 50; // Moderate variability
-    } else {
-      status = 100; // High variability
+    if (hrStdDev < 16) {
+      status = 50; // Low variability alert
+    } else if (hrStdDev > 45) {
+      status = 100; // High variability alert
     }
     Serial.println(status);
   }
@@ -143,52 +149,69 @@ void calculateStdDev() {
 
 // Web page handler
 void handleRoot() {
-  String html = "<!DOCTYPE html><html><head>";
-  html += "<title>HRV Monitor</title>";
-  html += "<meta name='viewport' content='width=device-width, initial-scale=1'>";
-  html += "<style>";
-  html += "body { font-family: Arial; text-align: center; padding: 20px; background: #1a1a1a; color: white; }";
-  html += ".card { background: #2d2d2d; padding: 30px; border-radius: 15px; margin: 20px auto; max-width: 500px; }";
-  html += ".value { font-size: 48px; font-weight: bold; margin: 20px 0; }";
-  html += ".label { font-size: 18px; color: #888; }";
-  html += ".alert { background: #ff4444; color: white; padding: 20px; border-radius: 10px; margin: 20px 0; font-size: 24px; }";
-  html += ".normal { background: #44ff44; color: black; padding: 20px; border-radius: 10px; margin: 20px 0; font-size: 24px; }";
-  html += "</style>";
-  html += "<script>";
-  html += "setInterval(function() {";
-  html += "  fetch('/data').then(r => r.json()).then(data => {";
-  html += "    document.getElementById('hr').innerText = data.heartRate;";
-  html += "    document.getElementById('stddev').innerText = data.stdDev.toFixed(2);";
-  html += "    if(data.alert) {";
-  html += "      document.getElementById('status').className = 'alert';";
-  html += "      document.getElementById('status').innerText = '⚠️ HIGH VARIABILITY ALERT';";
-  html += "    } else {";
-  html += "      document.getElementById('status').className = 'normal';";
-  html += "      document.getElementById('status').innerText = '✓ Normal';";
-  html += "    }";
-  html += "  });";
-  html += "}, 500);";
-  html += "</script>";
-  html += "</head><body>";
-  html += "<h1>Heart Rate Variability Monitor</h1>";
-  html += "<div class='card'>";
-  html += "<div class='label'>Heart Rate</div>";
-  html += "<div class='value' id='hr'>--</div>";
-  html += "<div class='label'>Standard Deviation</div>";
-  html += "<div class='value' id='stddev'>--</div>";
-  html += "</div>";
-  html += "<div id='status' class='normal'>Loading...</div>";
-  html += "</body></html>";
+  String html = F("<!DOCTYPE html><html><head>"
+  "<meta charset='UTF-8'>"
+  "<title>HRV Monitor</title>"
+  "<meta name='viewport' content='width=device-width,initial-scale=1'>"
+  "<style>"
+  "*{margin:0;padding:0;box-sizing:border-box}"
+  "body{font-family:'Segoe UI',Tahoma,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px;display:flex;align-items:center;justify-content:center}"
+  ".container{background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.3);padding:40px;max-width:600px;width:100%}"
+  "h1{color:#333;font-size:32px;margin-bottom:30px;text-align:center;font-weight:600}"
+  ".metrics{display:grid;grid-template-columns:1fr 1fr;gap:20px}"
+  ".metric{background:linear-gradient(135deg,#f5f7fa 0%,#c3cfe2 100%);padding:25px;border-radius:15px;text-align:center;transition:transform 0.2s}"
+  ".metric:hover{transform:translateY(-5px)}"
+  ".metric-label{color:#666;font-size:14px;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:500}"
+  ".metric-value{color:#333;font-size:42px;font-weight:700}"
+  ".metric-unit{color:#888;font-size:14px;margin-top:5px}"
+  ".alert-box{margin-top:30px;padding:20px;border-radius:15px;text-align:center;font-size:18px;font-weight:600;display:none}"
+  ".alert-box.show{display:block;animation:slideIn 0.3s}"
+  ".alert-box.high{background:#f8d7da;color:#721c24;border:2px solid #f5c6cb}"
+  ".alert-box.low{background:#fff3cd;color:#856404;border:2px solid #ffeaa7}"
+  "@keyframes slideIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}"
+  "</style>"
+  "<script>"
+  "setInterval(()=>{"
+  "fetch('/data').then(r=>r.json()).then(d=>{"
+  "document.getElementById('hr').innerText=d.heartRate;"
+  "document.getElementById('stddev').innerText=d.stdDev.toFixed(2);"
+  "let a=document.getElementById('alert');"
+  "if(d.alertType=='high'){a.className='alert-box show high';a.innerHTML='&#9888; High Variability Alert (StdDev > 45)'}else if(d.alertType=='low'){a.className='alert-box show low';a.innerHTML='&#9888; Low Variability Alert (StdDev < 16)'}else{a.className='alert-box'}"
+  "})},500)"
+  "</script>"
+  "</head><body>"
+  "<div class='container'>"
+  "<h1>Heart Rate Variability Monitor</h1>"
+  "<div class='metrics'>"
+  "<div class='metric'>"
+  "<div class='metric-label'>Heart Rate</div>"
+  "<div class='metric-value' id='hr'>--</div>"
+  "<div class='metric-unit'>BPM</div>"
+  "</div>"
+  "<div class='metric'>"
+  "<div class='metric-label'>Std Deviation</div>"
+  "<div class='metric-value' id='stddev'>--</div>"
+  "<div class='metric-unit'>ms</div>"
+  "</div>"
+  "</div>"
+  "<div id='alert' class='alert-box'></div>"
+  "</div>"
+  "</body></html>");
   
   server.send(200, "text/html", html);
 }
 
 // JSON data endpoint
 void handleData() {
+  // Add CORS headers
+  server.sendHeader("Access-Control-Allow-Origin", "*");
+  server.sendHeader("Access-Control-Allow-Methods", "GET");
+  
   String json = "{";
   json += "\"heartRate\":" + String(heartRate) + ",";
   json += "\"stdDev\":" + String(hrStdDev) + ",";
-  json += "\"alert\":" + String(alertActive ? "true" : "false");
+  json += "\"alert\":" + String(alertActive ? "true" : "false") + ",";
+  json += "\"alertType\":\"" + alertType + "\"";
   json += "}";
   
   server.send(200, "application/json", json);
