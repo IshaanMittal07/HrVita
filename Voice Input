@@ -1,0 +1,95 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Button } from "@/components/ui/button";
+import { Mic, MicOff, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+
+export default function VoiceInput({ onTranscript, disabled }) {
+  const [isListening, setIsListening] = useState(false);
+  const [isSupported, setIsSupported] = useState(true);
+  const recognitionRef = useRef(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      
+      if (!SpeechRecognition) {
+        setIsSupported(false);
+        return;
+      }
+
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        onTranscript(transcript);
+        setIsListening(false);
+      };
+
+      recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        if (event.error === 'no-speech') {
+          toast.error('No speech detected. Please try again.');
+        } else if (event.error === 'not-allowed') {
+          toast.error('Microphone access denied. Please enable it in your browser settings.');
+        } else {
+          toast.error('Voice recognition error. Please try again.');
+        }
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = recognition;
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, [onTranscript]);
+
+  const toggleListening = () => {
+    if (!recognitionRef.current) return;
+
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      try {
+        recognitionRef.current.start();
+        setIsListening(true);
+        toast.success('Listening... Speak now');
+      } catch (error) {
+        console.error('Error starting recognition:', error);
+        toast.error('Could not start voice recognition');
+      }
+    }
+  };
+
+  if (!isSupported) {
+    return null;
+  }
+
+  return (
+    <Button
+      type="button"
+      size="icon"
+      variant={isListening ? "destructive" : "outline"}
+      onClick={toggleListening}
+      disabled={disabled}
+      className={isListening ? "animate-pulse" : ""}
+    >
+      {isListening ? (
+        <MicOff className="w-4 h-4" />
+      ) : (
+        <Mic className="w-4 h-4" />
+      )}
+    </Button>
+  );
+}
