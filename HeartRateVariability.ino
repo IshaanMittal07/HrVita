@@ -6,8 +6,8 @@
 DFRobot_MAX30102 particleSensor;
 
 // WiFi credentials - CHANGE THESE
-const char* ssid = "YOUR_WIFI_SSID";
-const char* password = "YOUR_WIFI_PASSWORD";
+const char* ssid = "John";
+const char* password = "p949zvp2";
 
 WebServer server(80);
 
@@ -82,7 +82,7 @@ void loop() {
     particleSensor.heartrateAndOxygenSaturation(&SPO2, &SPO2Valid, &heartRate, &heartRateValid);
     
     // Store ALL readings (even if not perfect) to get faster response
-    if (heartRate > 0 && heartRate < 200) {
+    if (heartRate > 0 && heartRate < 300) {
       hrReadings[readingIndex] = heartRate;
       readingIndex = (readingIndex + 1) % MAX_READINGS;
       if (readingCount < MAX_READINGS) {
@@ -100,7 +100,7 @@ void loop() {
             alertActive = true;
             Serial.println("ALERT: High variability detected!");
           }
-        } else if (hrStdDev < 16) {
+        } else if (hrStdDev < 15) {
           if (alertType != "low") {
             alertType = "low";
             alertActive = true;
@@ -121,7 +121,7 @@ void loop() {
     
     // Status indicator (0=normal, 50=low variability, 100=high variability)
     int status = 0;
-    if (hrStdDev < 16) {
+    if (hrStdDev < 15) {
       status = 50; // Low variability alert
     } else if (hrStdDev > 45) {
       status = 100; // High variability alert
@@ -169,14 +169,29 @@ void handleRoot() {
   ".alert-box.high{background:#f8d7da;color:#721c24;border:2px solid #f5c6cb}"
   ".alert-box.low{background:#fff3cd;color:#856404;border:2px solid #ffeaa7}"
   "@keyframes slideIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}"
+  ".charts{margin-top:30px;display:grid;gap:20px}"
+  ".chart-container{background:#f5f7fa;padding:20px;border-radius:15px}"
+  ".chart-title{color:#333;font-size:16px;font-weight:600;margin-bottom:15px;text-align:center}"
+  "canvas{width:100%!important;height:200px!important}"
   "</style>"
+  "<script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js'></script>"
   "<script>"
+  "let hrData=[];let stdDevData=[];let labels=[];let maxPoints=30;"
+  "let hrChart,stdDevChart;"
+  "window.onload=()=>{"
+  "hrChart=new Chart(document.getElementById('hrChart'),{type:'line',data:{labels:labels,datasets:[{label:'Heart Rate (BPM)',data:hrData,borderColor:'#667eea',backgroundColor:'rgba(102,126,234,0.1)',tension:0.4,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:false}}}});"
+  "stdDevChart=new Chart(document.getElementById('stdDevChart'),{type:'line',data:{labels:labels,datasets:[{label:'Std Deviation (ms)',data:stdDevData,borderColor:'#764ba2',backgroundColor:'rgba(118,75,162,0.1)',tension:0.4,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});"
+  "};"
   "setInterval(()=>{"
   "fetch('/data').then(r=>r.json()).then(d=>{"
   "document.getElementById('hr').innerText=d.heartRate;"
   "document.getElementById('stddev').innerText=d.stdDev.toFixed(2);"
   "let a=document.getElementById('alert');"
-  "if(d.alertType=='high'){a.className='alert-box show high';a.innerHTML='&#9888; High Variability Alert (StdDev > 45)'}else if(d.alertType=='low'){a.className='alert-box show low';a.innerHTML='&#9888; Low Variability Alert (StdDev < 16)'}else{a.className='alert-box'}"
+  "if(d.alertType=='high'){a.className='alert-box show high';a.innerHTML='&#9888; High Variability Alert (StdDev > 45)'}else if(d.alertType=='low'){a.className='alert-box show low';a.innerHTML='&#9888; Low Variability Alert (StdDev < 15)'}else{a.className='alert-box'}"
+  "let time=new Date().toLocaleTimeString();"
+  "hrData.push(d.heartRate);stdDevData.push(d.stdDev);labels.push(time);"
+  "if(hrData.length>maxPoints){hrData.shift();stdDevData.shift();labels.shift();}"
+  "hrChart.update();stdDevChart.update();"
   "})},500)"
   "</script>"
   "</head><body>"
@@ -195,6 +210,16 @@ void handleRoot() {
   "</div>"
   "</div>"
   "<div id='alert' class='alert-box'></div>"
+  "<div class='charts'>"
+  "<div class='chart-container'>"
+  "<div class='chart-title'>Heart Rate Over Time</div>"
+  "<canvas id='hrChart'></canvas>"
+  "</div>"
+  "<div class='chart-container'>"
+  "<div class='chart-title'>Standard Deviation Over Time</div>"
+  "<canvas id='stdDevChart'></canvas>"
+  "</div>"
+  "</div>"
   "</div>"
   "</body></html>");
   
