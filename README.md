@@ -55,8 +55,8 @@ This inspired our **real-time HRV wearable design**.
 ---
 
 ## 🛠️ Tech Stack
-**Hardware:** ESP32, MAX30102, LiPo battery  
-**Software:** C++, HRV algorithms, Web dashboard + chatbot  
+**Hardware:** ESP32-C3, MAX30102, 3.7V LiPo Battery, Soldering  
+**Software:** C++, WiFi/LAN, HRV Algorithms, Web Dashboard + AI Chatbot  
 
 ---
 
