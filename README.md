@@ -1,4 +1,4 @@
-# HRVita — HRV-Based Delirium Detection & Companionship 💙⌚
+# HRVita 💙⌚
 
 Vita is a lightweight wearable + web platform designed to **early-detect Hospital-Induced Delirium (HID)** using **Heart Rate Variability (HRV)** and provide **companionship support** for patients who often feel isolated or confused during hospitalization.
 
