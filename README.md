@@ -1,5 +1,7 @@
 # HRVita 💙⌚
 
+![HrVita Logo](HrVita.png)
+
 HRVita is a lightweight wearable + web platform designed to **early-detect Hospital-Induced Delirium (HID)** using **Heart Rate Variability (HRV)** and provide **companionship support** for patients who often feel isolated or confused during hospitalization.
 
 Try it here 👉 **https://health-monitor-copy-93ebcfa8.base44.app**  
@@ -71,4 +73,3 @@ This inspired our **real-time HRV wearable design**.
 ---
 
 
-![HrVita Logo](HrVita.png)
