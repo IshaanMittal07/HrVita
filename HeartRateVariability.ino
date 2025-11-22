@@ -6,8 +6,8 @@
 DFRobot_MAX30102 particleSensor;
 
 // WiFi credentials - CHANGE THESE
-const char* ssid = "John";
-const char* password = "p949zvp2";
+const char* ssid = "ssid";
+const char* password = "pass";
 
 WebServer server(80);
 
