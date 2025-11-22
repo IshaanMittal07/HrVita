@@ -50,7 +50,6 @@ This inspired our **real-time HRV wearable design**.
 - 🔧 Tune sensor settings (LED brightness, sampling rate, ADC range, etc.)  
 - 📦 Finalize wearable case design  
 - 🧪 Run end-to-end integration tests  
-- 🎤 Prepare final symposium presentation + demo
 
 ---
 
