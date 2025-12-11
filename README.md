@@ -4,7 +4,7 @@
 
 HRVita is a lightweight wearable + web platform designed to **early-detect Hospital-Induced Delirium (HID)** using **Heart Rate Variability (HRV)** and provide **companionship support** for patients who often feel isolated or confused during hospitalization.
 
-Try it here 👉 **https://health-monitor-copy-93ebcfa8.base44.app**  
+Try it here 👉 **[Web Dashboard](https://health-monitor-copy-93ebcfa8.base44.app) ** 
 Default device IP: **172.20.10.4**
 
 ---
@@ -36,39 +36,8 @@ This inspired our **real-time HRV wearable design**.
 
 ---
 
-## ⚠️ Current Challenges
-- Sensor accuracy + placement sensitivity  
-- Improving HRV calculation algorithms  
-- Research-backed mapping: HRV patterns → HID risk  
-- Bluetooth → website integration  
-- Designing final wearable case
-
----
-
-## 📅 Next Steps (Before Demo)
-- 🔵 Add Bluetooth for real-time data streaming  
-- 🔧 Tune sensor settings (LED brightness, sampling rate, ADC range, etc.)  
-- 📦 Finalize wearable case design  
-- 🧪 Run end-to-end integration tests  
-
----
-
 ## 🛠️ Tech Stack
 **Hardware:** ESP32-C3, MAX30102, 3.7V LiPo Battery, Soldering  
-**Software:** C++, WiFi/LAN, HRV Algorithms, Web Dashboard + AI Chatbot  
-
----
-
-## 📚 Works Cited  
-1. CIBS Center (2024)  
-2. Collier (2011)  
-3. Healio (2025)  
-4. Li (2024)  
-5. Oh et al. (2017)  
-6. Oh (2025)  
-7. Tesfaye et al. (2025)  
-8. Vandergriendt (2022)
-
----
+**Software:** C++, WiFi/LAN, Data Analysis and Computation, Web Dashboard + AI Chatbot  
 
 
