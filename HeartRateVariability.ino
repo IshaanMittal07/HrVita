@@ -147,7 +147,7 @@ void calculateStdDev() {
   hrStdDev = sqrt(sumSquaredDiff / readingCount);
 }
 
-// Web page handler
+// Simple debug webpage
 void handleRoot() {
   String html = F("<!DOCTYPE html><html><head>"
   "<meta charset='UTF-8'>"
